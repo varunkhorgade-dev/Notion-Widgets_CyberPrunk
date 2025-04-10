@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Widget</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background: transparent;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .widget {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 20px;
+            width: 320px;
+            border: 1px solid #30363d;
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.1);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        h1 {
+            font-size: 22px;
+            margin: 0 0 10px;
+            font-weight: 700;
+            color: #58a6ff;
+            letter-spacing: 1px;
+        }
+        .message {
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 14px;
+        }
+        .age, .time {
+            font-size: 16px;
+            font-weight: 500;
+            color: #c9d1d9;
+            margin: 6px 0;
+            padding: 6px 10px;
+            background: #161b22;
+            border-radius: 6px;
+            border-left: 3px solid #58a6ff;
+        }
+        .sub-text {
+            font-size: 11px;
+            color: #6e7681;
+            margin-top: 14px;
+        }
+        .blink {
+            color: #ff7b72;
+            animation: blink 1.2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        /* Settings Button */
+        .settings-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #21262d;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            color: #58a6ff;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .settings-btn:hover {
+            background: #30363d;
+            transform: scale(1.1);
+        }
+        /* Settings Overlay */
+        .settings-overlay {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 10px;
+            width: 150px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+        .settings-overlay label {
+            font-size: 12px;
+            color: #c9d1d9;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .settings-overlay select, .settings-overlay button {
+            width: 100%;
+            padding: 4px;
+            margin-bottom: 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+            cursor: pointer;
+        }
+        .settings-overlay button {
+            background: #58a6ff;
+            color: #0d1117;
+            border: none;
+        }
+        .settings-overlay button:hover {
+            background: #79c0ff;
+        }
+        /* Light Mode */
+        body.light .widget {
+            background: #ffffff;
+            border-color: #d0d7de;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+        body.light h1 {
+            color: #1f6feb;
+        }
+        body.light .message, body.light .sub-text {
+            color: #57606a;
+        }
+        body.light .age, body.light .time {
+            color: #24292f;
+            background: #f6f8fa;
+            border-left-color: #1f6feb;
+        }
+        body.light .settings-btn {
+            background: #f6f8fa;
+            color: #1f6feb;
+        }
+        body.light .settings-btn:hover {
+            background: #e6e9ed;
+        }
+        body.light .settings-overlay {
+            background: #ffffff;
+            border-color: #d0d7de;
+        }
+        body.light .settings-overlay select {
+            background: #f6f8fa;
+            border-color: #d0d7de;
+            color: #24292f;
+        }
+        body.light .settings-overlay button {
+            background: #1f6feb;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget">
+        <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+        <div class="settings-overlay" id="settings">
+            <label>Theme:</label>
+            <select id="themeSelect" onchange="changeTheme()">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+            </select>
+            <label>Update Interval (ms):</label>
+            <select id="intervalSelect" onchange="changeInterval()">
+                <option value="1000">1000</option>
+                <option value="500">500</option>
+                <option value="2000">2000</option>
+            </select>
+            <button onclick="closeSettings()">Close</button>
+        </div>
+        <h1>Hey Varun!</h1>
+        <div class="message">Time alive:</div>
+        <div class="age" id="age"></div>
+        <div class="time" id="time"></div>
+        <div class="sub-text">Refreshing live<span class="blink">...</span></div>
+    </div>
+
+    <script>
+        let intervalId = setInterval(calculateAge, 1000);
+
+        function calculateAge() {
+            const birthDate = new Date('1996-11-26T10:55:00');
+            const now = new Date();
+            
+            const diffInMilliseconds = now - birthDate;
+            const totalSeconds = Math.floor(diffInMilliseconds / 1000);
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            const totalHours = Math.floor(totalMinutes / 60);
+            const totalDays = Math.floor(totalHours / 24);
+            
+            const years = Math.floor(totalDays / 365.25);
+            const months = Math.floor((totalDays % 365.25) / 30);
+            const days = Math.floor(totalDays % 365.25 % 30);
+            const hours = totalHours % 24;
+            const minutes = totalMinutes % 60;
+            const seconds = totalSeconds % 60;
+            
+            document.getElementById('age').innerHTML = `${years} yrs, ${months} mo, ${days} days`;
+            document.getElementById('time').innerHTML = `${hours} hr, ${minutes} min, ${seconds} sec`;
+        }
+
+        calculateAge();
+
+        function toggleSettings() {
+            const settings = document.getElementById('settings');
+            settings.style.display = settings.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function closeSettings() {
+            document.getElementById('settings').style.display = 'none';
+        }
+
+        function changeTheme() {
+            const theme = document.getElementById('themeSelect').value;
+            document.body.className = theme === 'light' ? 'light' : '';
+        }
+
+        function changeInterval() {
+            const interval = parseInt(document.getElementById('intervalSelect').value);
+            clearInterval(intervalId);
+            intervalId = setInterval(calculateAge, interval);
+        }
+    </script>
+</body>
+</html>
